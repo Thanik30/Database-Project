@@ -1,0 +1,21 @@
+FROM node:22-alpine
+
+WORKDIR /app
+
+# ก๊อปปี้แค่ package.json มาก่อน
+COPY package.json ./
+
+RUN npm cache clean --force
+
+# ใช้ npm ธรรมดาติดตั้งแทน pnpm (ตัดปัญหาจุกจิกทั้งหมด)
+RUN npm install -g npm@latest && \
+    rm -f package-lock.json pnpm-lock.yaml && \
+    npm install --no-package-lock --legacy-peer-deps
+
+# ก๊อปปี้โค้ดทั้งหมดตามมา
+COPY . .
+
+EXPOSE 3000
+
+# เปลี่ยนคำสั่งรันเป็น npm
+CMD ["npm", "run", "dev"]

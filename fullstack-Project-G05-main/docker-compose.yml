@@ -1,0 +1,38 @@
+version: '3.8'
+services:
+  # 1. Database Service
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: project_G05
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  # 2. Backend Service
+  backend:
+    build: ./backend
+    ports:
+      - "3001:3000"
+    # ดึงค่าตั้งค่าทั้งหมดจากไฟล์ .env
+    env_file:
+      - ./backend/.env
+    environment:
+      # เขียนทับเฉพาะ DATABASE_URL ให้ชี้ไปหา 'postgres' ใน Docker Network
+      - DATABASE_URL=postgresql://postgres:password123@postgres:5432/project_G05
+    depends_on:
+      - postgres
+
+  # 3. Frontend Service
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
